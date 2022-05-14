@@ -26,13 +26,14 @@ type_enc = ('боевое событие',
 tkinter_result = dict()
 
 
-def start(event):
-    print("123")
+def start():
+    checkbuttons()
+    print(tkinter_result)
+    table_obj.quit()
 
 
 def add_button_result_to_dict(event, button):
     global tkinter_result
-    print(button)
     if button == 'террейн':
         res = table_obj.terrain_result()
         tkinter_result['террейн'] = res
@@ -45,7 +46,20 @@ def add_button_result_to_dict(event, button):
         res = table_obj.type_result()
         tkinter_result['тип события'] = res
 
-    print(tkinter_result)
+
+def checkbuttons():
+    global tkinter_result
+    tkinter_result['первый игрок'] = table_obj.user1_status.get()
+    tkinter_result['второй игрок'] = table_obj.user2_status.get()
+    tkinter_result['третий игрок'] = table_obj.user3_status.get()
+    tkinter_result['четвертый игрок'] = table_obj.user4_status.get()
+    tkinter_result['пятый игрок'] = table_obj.user5_status.get()
+
+    tkinter_result['общий дебафф'] = table_obj.debuff1_status.get()
+    tkinter_result['общий бафф'] = table_obj.buff1_status.get()
+
+    tkinter_result['дебафф награды'] = table_obj.debuff2_status.get()
+    tkinter_result['бафф награды'] = table_obj.buff2_status.get()
 
 
 class App(Frame):
@@ -95,19 +109,24 @@ class App(Frame):
         self.user_lab = Label(self.win, text='Участвующие игроки')
         self.user_lab.place(relx=0, rely=0.3)
 
-        self.user1 = Checkbutton(self.win, text='Первый')
+        self.user1_status = IntVar()
+        self.user1 = Checkbutton(self.win, text='Первый', variable=self.user1_status)
         self.user1.place(relx=0, rely=0.4)
 
-        self.user2 = Checkbutton(self.win, text='Второй')
+        self.user2_status = IntVar()
+        self.user2 = Checkbutton(self.win, text='Второй', variable=self.user2_status)
         self.user2.place(relx=0, rely=0.5)
 
-        self.user3 = Checkbutton(self.win, text='Третий')
+        self.user3_status = IntVar()
+        self.user3 = Checkbutton(self.win, text='Третий', variable=self.user3_status)
         self.user3.place(relx=0, rely=0.6)
 
-        self.user4 = Checkbutton(self.win, text='Четвертый')
+        self.user4_status = IntVar()
+        self.user4 = Checkbutton(self.win, text='Четвертый', variable=self.user4_status)
         self.user4.place(relx=0, rely=0.7)
 
-        self.user5 = Checkbutton(self.win, text='Пятый')
+        self.user5_status = IntVar()
+        self.user5 = Checkbutton(self.win, text='Пятый', variable=self.user5_status)
         self.user5.place(relx=0, rely=0.8)
 
         """
@@ -116,16 +135,20 @@ class App(Frame):
         self.gm_lab = Label(self.win, text='Кнопки, серящие или мошнящие под игроков')
         self.gm_lab.place(relx=0.3, rely=0.8)
 
-        self.debuff1 = Checkbutton(self.win, text='Орг серит')
+        self.debuff1_status = IntVar()
+        self.debuff1 = Checkbutton(self.win, text='Орг серит', variable=self.debuff1_status)
         self.debuff1.place(relx=0.15, rely=0.9)
 
-        self.buff1 = Checkbutton(self.win, text='Орг помогает')
+        self.buff1_status = IntVar()
+        self.buff1 = Checkbutton(self.win, text='Орг помогает', variable=self.buff1_status)
         self.buff1.place(relx=0.35, rely=0.9)
 
-        self.debuff2 = Checkbutton(self.win, text='Душная награда')
+        self.debuff2_status = IntVar()
+        self.debuff2 = Checkbutton(self.win, text='Душная награда', variable=self.debuff2_status)
         self.debuff2.place(relx=0.55, rely=0.9)
 
-        self.buff2 = Checkbutton(self.win, text='Щедрая награда')
+        self.buff2_status = IntVar()
+        self.buff2 = Checkbutton(self.win, text='Щедрая награда', variable=self.buff2_status)
         self.buff2.place(relx=0.75, rely=0.9)
 
         """
