@@ -25,7 +25,8 @@ type_enc = ('боевое событие',
 
 type_threat = (0, 1, 2, 3, 4, 5)
 
-tkinter_result = {'угроза орков': 0}
+tkinter_result = {'угроза орков': 0, 'угроза хаоса': 0, 'угроза друкхари': 0,
+                  'угроза тиранидов': 0, 'угроза тау': 0, 'угроза некронов': 0}
 
 
 def start():
@@ -69,7 +70,7 @@ class App(Frame):
         Кнопка старта
         """
         self.start_button = Button(self.win, text='START', command=start)
-        self.start_button.place(relwidth=0.2, relheight=0.2, relx=0.4, rely=0.4)
+        self.start_button.place(relwidth=0.2, relheight=0.2, relx=0.4, rely=0.5)
 
         """
         Кнопка выбора зоны события
@@ -102,26 +103,70 @@ class App(Frame):
         self.type_combo.place(relwidth=0.2, relheight=0.1, relx=0.799, rely=0.7)
 
         '''
+        Плашка угроз
+        '''
+        self.threat = Label(self.win, text='Степень угрозы:')
+        self.threat.place(relx=0.4, rely=0)
+
+        '''
         Кнопка определяющая степень угрозы орков на местности
         '''
-        self.orcs_threat_name = Label(self.win, text='Угроза орков')
-        self.orcs_threat_name.place(relx=0.215, rely=0)
+        self.orcs_threat_name = Label(self.win, text='Орки')
+        self.orcs_threat_name.place(relx=0.22, rely=0.08)
         self.orcs_threat_combo = Combobox(self.win, values=type_threat)
         self.orcs_threat_combo.current(0)
         self.orcs_threat_combo.bind('<<ComboboxSelected>>',
-                                    lambda event: add_button_result_to_dict(event, 'угроза орков', 'orcs_threat_result'))
-        self.orcs_threat_combo.place(relwidth=0.1, relheight=0.1, relx=0.22, rely=0.1)
+                                    lambda event: add_button_result_to_dict(event, 'угроза орков',
+                                                                            'orcs_threat_result'))
+        self.orcs_threat_combo.place(relwidth=0.1, relheight=0.1, relx=0.22, rely=0.18)
 
         '''
         Кнопка определяющая степень угрозы хаоса на местности
         '''
-        self.chaos_threat_name = Label(self.win, text='Угроза хаоса')
-        self.chaos_threat_name.place(relx=0.415, rely=0)
+        self.chaos_threat_name = Label(self.win, text='Хаос')
+        self.chaos_threat_name.place(relx=0.32, rely=0.08)
         self.chaos_threat_combo = Combobox(self.win, values=type_threat)
         self.chaos_threat_combo.current(0)
         self.chaos_threat_combo.bind('<<ComboboxSelected>>',
-                                     lambda event: add_button_result_to_dict(event, 'угроза хаоса', 'chaos_threat_result'))
-        self.chaos_threat_combo.place(relwidth=0.1, relheight=0.1, relx=0.42, rely=0.1)
+                                     lambda event: add_button_result_to_dict(event, 'угроза хаоса',
+                                                                             'chaos_threat_result'))
+        self.chaos_threat_combo.place(relwidth=0.1, relheight=0.1, relx=0.325, rely=0.18)
+
+        '''
+        Кнопка определяющая степень угрозы друкхари на местности
+        '''
+        self.t_elves_threat_name = Label(self.win, text='Друкхари')
+        self.t_elves_threat_name.place(relx=0.425, rely=0.08)
+        self.t_elves_threat_combo = Combobox(self.win, values=type_threat)
+        self.t_elves_threat_combo.current(0)
+        self.t_elves_threat_combo.bind('<<ComboboxSelected>>',
+                                       lambda event: add_button_result_to_dict(event, 'угроза друкхари',
+                                                                               't_elves_threat_result'))
+        self.t_elves_threat_combo.place(relwidth=0.1, relheight=0.1, relx=0.43, rely=0.18)
+
+        '''
+        Кнопка определяющая степень угрозы тиранидов на местности
+        '''
+        self.tyranids_threat_name = Label(self.win, text='Тираниды')
+        self.tyranids_threat_name.place(relx=0.525, rely=0.08)
+        self.tyranids_threat_combo = Combobox(self.win, values=type_threat)
+        self.tyranids_threat_combo.current(0)
+        self.tyranids_threat_combo.bind('<<ComboboxSelected>>',
+                                        lambda event: add_button_result_to_dict(event, 'угроза тиранидов',
+                                                                                'tyranids_threat_result'))
+        self.tyranids_threat_combo.place(relwidth=0.1, relheight=0.1, relx=0.535, rely=0.18)
+
+        '''
+        Кнопка определяющая степень угрозы тау на местности
+        '''
+        self.tau_threat_name = Label(self.win, text='Тау')
+        self.tau_threat_name.place(relx=0.63, rely=0.08)
+        self.tau_threat_combo = Combobox(self.win, values=type_threat)
+        self.tau_threat_combo.current(0)
+        self.tau_threat_combo.bind('<<ComboboxSelected>>',
+                                   lambda event: add_button_result_to_dict(event, 'угроза тау',
+                                                                           'tau_threat_result'))
+        self.tau_threat_combo.place(relwidth=0.1, relheight=0.1, relx=0.64, rely=0.18)
 
         """
         Кнопки участвующих в событии игроков
@@ -189,6 +234,15 @@ class App(Frame):
 
     def chaos_threat_result(self):
         return self.chaos_threat_combo.get()
+
+    def t_elves_threat_result(self):
+        return self.t_elves_threat_combo.get()
+
+    def tyranids_threat_result(self):
+        return self.tyranids_threat_combo.get()
+
+    def tau_threat_result(self):
+        return self.tau_threat_combo.get()
 
     def quit(self):
         self.win.destroy()
