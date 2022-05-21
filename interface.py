@@ -23,28 +23,23 @@ type_enc = ('боевое событие',
             'незначимое событие',
             'случайное событие')
 
-tkinter_result = dict()
+type_threat = (0, 1, 2, 3, 4, 5)
+
+tkinter_result = {'угроза орков': 0}
 
 
 def start():
+    global tkinter_result
     checkbuttons()
     print(tkinter_result)
     table_obj.quit()
 
 
-def add_button_result_to_dict(event, button):
+def add_button_result_to_dict(event, button, method_name):
     global tkinter_result
-    if button == 'террейн':
-        res = table_obj.terrain_result()
-        tkinter_result['террейн'] = res
-
-    if button == 'сложность':
-        res = table_obj.danger_result()
-        tkinter_result['сложность'] = res
-
-    if button == 'тип события':
-        res = table_obj.type_result()
-        tkinter_result['тип события'] = res
+    result = table_obj.__getattribute__(method_name)
+    dict_res = result()
+    tkinter_result[button] = dict_res
 
 
 def checkbuttons():
@@ -82,7 +77,8 @@ class App(Frame):
         self.ter_name = Label(self.win, text='Выберите место действия')
         self.ter_name.place(relwidth=0.2, relheight=0.1, relx=0.001, rely=0.0)
         self.terrain_combo = Combobox(self.win, values=terrains)
-        self.terrain_combo.bind('<<ComboboxSelected>>', lambda event: add_button_result_to_dict(event, 'террейн'))
+        self.terrain_combo.bind('<<ComboboxSelected>>',
+                                lambda event: add_button_result_to_dict(event, 'террейн', 'terrain_result'))
         self.terrain_combo.place(relwidth=0.2, relheight=0.1, relx=0.001, rely=0.1)
 
         """
@@ -91,7 +87,8 @@ class App(Frame):
         self.dang_name = Label(self.win, text='Выберите опастность зоны')
         self.dang_name.place(relx=0.78, rely=0)
         self.danger_combo = Combobox(self.win, values=danger_level)
-        self.danger_combo.bind('<<ComboboxSelected>>', lambda event: add_button_result_to_dict(event, 'сложность'))
+        self.danger_combo.bind('<<ComboboxSelected>>',
+                               lambda event: add_button_result_to_dict(event, 'сложность', 'danger_result'))
         self.danger_combo.place(relwidth=0.2, relheight=0.1, relx=0.799, rely=0.1)
 
         '''
@@ -100,8 +97,31 @@ class App(Frame):
         self.type_name = Label(self.win, text='Выберите тип события')
         self.type_name.place(relx=0.8, rely=0.6)
         self.type_combo = Combobox(self.win, values=type_enc)
-        self.type_combo.bind('<<ComboboxSelected>>', lambda event: add_button_result_to_dict(event, 'тип события'))
+        self.type_combo.bind('<<ComboboxSelected>>',
+                             lambda event: add_button_result_to_dict(event, 'тип события', 'type_result'))
         self.type_combo.place(relwidth=0.2, relheight=0.1, relx=0.799, rely=0.7)
+
+        '''
+        Кнопка определяющая степень угрозы орков на местности
+        '''
+        self.orcs_threat_name = Label(self.win, text='Угроза орков')
+        self.orcs_threat_name.place(relx=0.215, rely=0)
+        self.orcs_threat_combo = Combobox(self.win, values=type_threat)
+        self.orcs_threat_combo.current(0)
+        self.orcs_threat_combo.bind('<<ComboboxSelected>>',
+                                    lambda event: add_button_result_to_dict(event, 'угроза орков', 'orcs_threat_result'))
+        self.orcs_threat_combo.place(relwidth=0.1, relheight=0.1, relx=0.22, rely=0.1)
+
+        '''
+        Кнопка определяющая степень угрозы хаоса на местности
+        '''
+        self.chaos_threat_name = Label(self.win, text='Угроза хаоса')
+        self.chaos_threat_name.place(relx=0.415, rely=0)
+        self.chaos_threat_combo = Combobox(self.win, values=type_threat)
+        self.chaos_threat_combo.current(0)
+        self.chaos_threat_combo.bind('<<ComboboxSelected>>',
+                                     lambda event: add_button_result_to_dict(event, 'угроза хаоса', 'chaos_threat_result'))
+        self.chaos_threat_combo.place(relwidth=0.1, relheight=0.1, relx=0.42, rely=0.1)
 
         """
         Кнопки участвующих в событии игроков
@@ -163,6 +183,12 @@ class App(Frame):
 
     def type_result(self):
         return self.type_combo.get()
+
+    def orcs_threat_result(self):
+        return self.orcs_threat_combo.get()
+
+    def chaos_threat_result(self):
+        return self.chaos_threat_combo.get()
 
     def quit(self):
         self.win.destroy()
