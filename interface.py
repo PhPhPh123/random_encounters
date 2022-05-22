@@ -28,7 +28,7 @@ type_threat = (0, 1, 2, 3, 4, 5)
 tkinter_result = {'угроза орков': 0, 'угроза хаоса': 0, 'угроза друкхари': 0,
                   'угроза тиранидов': 0, 'угроза тау': 0, 'угроза некронов': 0,
                   'угроза мутантов': 0, 'угроза малых рас': 0, 'угроза дикой природы': 0,
-                  'угроза стихийных бедствий': 0}
+                  'угроза стихийных бедствий': 0, 'угроза бандитов/мятежников': 0}
 
 
 def start():
@@ -230,6 +230,18 @@ class App(Frame):
                                                                                 'disaster_threat_result'))
         self.disaster_threat_combo.place(relwidth=0.1, relheight=0.1, relx=0.66, rely=0.38)
 
+        '''
+        Кнопка определяющая степень угрозы стихийных бедствий на местности
+        '''
+        self.bandits_threat_name = Label(self.win, text='Бандиты/Мятежники')
+        self.bandits_threat_name.place(relx=0.75, rely=0.3)
+        self.bandits_threat_combo = Combobox(self.win, values=type_threat)
+        self.bandits_threat_combo.current(0)
+        self.bandits_threat_combo.bind('<<ComboboxSelected>>',
+                                       lambda event: add_button_result_to_dict(event, 'угроза бандитов/мятежников',
+                                                                               'bandits_threat_result'))
+        self.bandits_threat_combo.place(relwidth=0.1, relheight=0.1, relx=0.765, rely=0.38)
+
         """
         Кнопки участвующих в событии игроков
         """
@@ -320,6 +332,9 @@ class App(Frame):
 
     def disaster_threat_result(self):
         return self.disaster_threat_combo.get()
+
+    def bandits_threat_result(self):
+        return self.bandits_threat_combo.get()
 
     def quit(self):
         self.win.destroy()
