@@ -26,7 +26,9 @@ type_enc = ('боевое событие',
 type_threat = (0, 1, 2, 3, 4, 5)
 
 tkinter_result = {'угроза орков': 0, 'угроза хаоса': 0, 'угроза друкхари': 0,
-                  'угроза тиранидов': 0, 'угроза тау': 0, 'угроза некронов': 0}
+                  'угроза тиранидов': 0, 'угроза тау': 0, 'угроза некронов': 0,
+                  'угроза мутантов': 0, 'угроза малых рас': 0, 'угроза дикой природы': 0,
+                  'угроза стихийных бедствий': 0}
 
 
 def start():
@@ -106,67 +108,127 @@ class App(Frame):
         Плашка угроз
         '''
         self.threat = Label(self.win, text='Степень угрозы:')
-        self.threat.place(relx=0.4, rely=0)
+        self.threat.place(relx=0.44, rely=0)
 
         '''
         Кнопка определяющая степень угрозы орков на местности
         '''
         self.orcs_threat_name = Label(self.win, text='Орки')
-        self.orcs_threat_name.place(relx=0.22, rely=0.08)
+        self.orcs_threat_name.place(relx=0.24, rely=0.08)
         self.orcs_threat_combo = Combobox(self.win, values=type_threat)
         self.orcs_threat_combo.current(0)
         self.orcs_threat_combo.bind('<<ComboboxSelected>>',
                                     lambda event: add_button_result_to_dict(event, 'угроза орков',
                                                                             'orcs_threat_result'))
-        self.orcs_threat_combo.place(relwidth=0.1, relheight=0.1, relx=0.22, rely=0.18)
+        self.orcs_threat_combo.place(relwidth=0.1, relheight=0.1, relx=0.24, rely=0.18)
 
         '''
         Кнопка определяющая степень угрозы хаоса на местности
         '''
         self.chaos_threat_name = Label(self.win, text='Хаос')
-        self.chaos_threat_name.place(relx=0.32, rely=0.08)
+        self.chaos_threat_name.place(relx=0.34, rely=0.08)
         self.chaos_threat_combo = Combobox(self.win, values=type_threat)
         self.chaos_threat_combo.current(0)
         self.chaos_threat_combo.bind('<<ComboboxSelected>>',
                                      lambda event: add_button_result_to_dict(event, 'угроза хаоса',
                                                                              'chaos_threat_result'))
-        self.chaos_threat_combo.place(relwidth=0.1, relheight=0.1, relx=0.325, rely=0.18)
+        self.chaos_threat_combo.place(relwidth=0.1, relheight=0.1, relx=0.345, rely=0.18)
 
         '''
         Кнопка определяющая степень угрозы друкхари на местности
         '''
         self.t_elves_threat_name = Label(self.win, text='Друкхари')
-        self.t_elves_threat_name.place(relx=0.425, rely=0.08)
+        self.t_elves_threat_name.place(relx=0.445, rely=0.08)
         self.t_elves_threat_combo = Combobox(self.win, values=type_threat)
         self.t_elves_threat_combo.current(0)
         self.t_elves_threat_combo.bind('<<ComboboxSelected>>',
                                        lambda event: add_button_result_to_dict(event, 'угроза друкхари',
                                                                                't_elves_threat_result'))
-        self.t_elves_threat_combo.place(relwidth=0.1, relheight=0.1, relx=0.43, rely=0.18)
+        self.t_elves_threat_combo.place(relwidth=0.1, relheight=0.1, relx=0.45, rely=0.18)
 
         '''
         Кнопка определяющая степень угрозы тиранидов на местности
         '''
         self.tyranids_threat_name = Label(self.win, text='Тираниды')
-        self.tyranids_threat_name.place(relx=0.525, rely=0.08)
+        self.tyranids_threat_name.place(relx=0.545, rely=0.08)
         self.tyranids_threat_combo = Combobox(self.win, values=type_threat)
         self.tyranids_threat_combo.current(0)
         self.tyranids_threat_combo.bind('<<ComboboxSelected>>',
                                         lambda event: add_button_result_to_dict(event, 'угроза тиранидов',
                                                                                 'tyranids_threat_result'))
-        self.tyranids_threat_combo.place(relwidth=0.1, relheight=0.1, relx=0.535, rely=0.18)
+        self.tyranids_threat_combo.place(relwidth=0.1, relheight=0.1, relx=0.555, rely=0.18)
 
         '''
         Кнопка определяющая степень угрозы тау на местности
         '''
         self.tau_threat_name = Label(self.win, text='Тау')
-        self.tau_threat_name.place(relx=0.63, rely=0.08)
+        self.tau_threat_name.place(relx=0.65, rely=0.08)
         self.tau_threat_combo = Combobox(self.win, values=type_threat)
         self.tau_threat_combo.current(0)
         self.tau_threat_combo.bind('<<ComboboxSelected>>',
                                    lambda event: add_button_result_to_dict(event, 'угроза тау',
                                                                            'tau_threat_result'))
-        self.tau_threat_combo.place(relwidth=0.1, relheight=0.1, relx=0.64, rely=0.18)
+        self.tau_threat_combo.place(relwidth=0.1, relheight=0.1, relx=0.66, rely=0.18)
+
+        '''
+        Кнопка определяющая степень угрозы некронов на местности
+        '''
+        self.necrons_threat_name = Label(self.win, text='Некроны')
+        self.necrons_threat_name.place(relx=0.24, rely=0.3)
+        self.necrons_threat_combo = Combobox(self.win, values=type_threat)
+        self.necrons_threat_combo.current(0)
+        self.necrons_threat_combo.bind('<<ComboboxSelected>>',
+                                       lambda event: add_button_result_to_dict(event, 'угроза некронов',
+                                                                               'necrons_threat_result'))
+        self.necrons_threat_combo.place(relwidth=0.1, relheight=0.1, relx=0.24, rely=0.38)
+
+        '''
+        Кнопка определяющая степень угрозы мутантов на местности
+        '''
+        self.mutants_threat_name = Label(self.win, text='Мутанты')
+        self.mutants_threat_name.place(relx=0.34, rely=0.3)
+        self.mutants_threat_combo = Combobox(self.win, values=type_threat)
+        self.mutants_threat_combo.current(0)
+        self.mutants_threat_combo.bind('<<ComboboxSelected>>',
+                                       lambda event: add_button_result_to_dict(event, 'угроза мутантов',
+                                                                               'mutants_threat_result'))
+        self.mutants_threat_combo.place(relwidth=0.1, relheight=0.1, relx=0.345, rely=0.38)
+
+        '''
+        Кнопка определяющая степень угрозы малых фракций на местности
+        '''
+        self.small_races_threat_name = Label(self.win, text='Малые расы')
+        self.small_races_threat_name.place(relx=0.44, rely=0.3)
+        self.small_races_threat_combo = Combobox(self.win, values=type_threat)
+        self.small_races_threat_combo.current(0)
+        self.small_races_threat_combo.bind('<<ComboboxSelected>>',
+                                           lambda event: add_button_result_to_dict(event, 'угроза малых рас',
+                                                                                   'small_races_threat_result'))
+        self.small_races_threat_combo.place(relwidth=0.1, relheight=0.1, relx=0.45, rely=0.38)
+
+        '''
+        Кнопка определяющая степень угрозы дикой природы на местности
+        '''
+        self.wild_threat_name = Label(self.win, text='Дикая природа')
+        self.wild_threat_name.place(relx=0.545, rely=0.3)
+        self.wild_threat_combo = Combobox(self.win, values=type_threat)
+        self.wild_threat_combo.current(0)
+        self.wild_threat_combo.bind('<<ComboboxSelected>>',
+                                    lambda event: add_button_result_to_dict(event, 'угроза дикой природы',
+                                                                            'wild_threat_result'))
+        self.wild_threat_combo.place(relwidth=0.1, relheight=0.1, relx=0.555, rely=0.38)
+
+        '''
+        Кнопка определяющая степень угрозы стихийных бедствий на местности
+        '''
+        self.disaster_threat_name = Label(self.win, text='Бедствия')
+        self.disaster_threat_name.place(relx=0.67, rely=0.3)
+        self.disaster_threat_combo = Combobox(self.win, values=type_threat)
+        self.disaster_threat_combo.current(0)
+        self.disaster_threat_combo.bind('<<ComboboxSelected>>',
+                                        lambda event: add_button_result_to_dict(event, 'угроза стихийных бедствий',
+                                                                                'disaster_threat_result'))
+        self.disaster_threat_combo.place(relwidth=0.1, relheight=0.1, relx=0.66, rely=0.38)
 
         """
         Кнопки участвующих в событии игроков
@@ -243,6 +305,21 @@ class App(Frame):
 
     def tau_threat_result(self):
         return self.tau_threat_combo.get()
+
+    def necrons_threat_result(self):
+        return self.necrons_threat_combo.get()
+
+    def mutants_threat_result(self):
+        return self.mutants_threat_combo.get()
+
+    def small_races_threat_result(self):
+        return self.small_races_threat_combo.get()
+
+    def wild_threat_result(self):
+        return self.wild_threat_combo.get()
+
+    def disaster_threat_result(self):
+        return self.disaster_threat_combo.get()
 
     def quit(self):
         self.win.destroy()
