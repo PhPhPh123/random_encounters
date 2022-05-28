@@ -1,11 +1,11 @@
-from random import randint, choice, choices
+import random
 import json
 import sqlite3
 from tkinter import *
-from tkinter.scrolledtext import ScrolledText
+import jinja2
 from tkinter.ttk import Combobox
 
-terrains = ('пустыня',
+terrains = ('Пустыня',
             'город-улей',
             'имперский городок',
             'имперские руины',
@@ -15,7 +15,7 @@ terrains = ('пустыня',
 danger_level = ('красная угроза',
                 'фиолетовая угроза',
                 'синяя угроза',
-                'зеленая угроза',
+                'Зеленая угроза',
                 'неизвестная угроза')
 
 type_enc = ('боевое событие',
@@ -28,7 +28,35 @@ type_threat = ('0', '1', '2', '3', '4', '5')
 tkinter_result = {'угроза орков': 0, 'угроза хаоса': 0, 'угроза друкхари': 0,
                   'угроза тиранидов': 0, 'угроза тау': 0, 'угроза некронов': 0,
                   'угроза мутантов': 0, 'угроза малых рас': 0, 'угроза дикой природы': 0,
-                  'угроза стихийных бедствий': 0, 'угроза бандитов/мятежников': 0}
+                  'угроза стихийных бедствий': 0, 'угроза бандитов/мятежников': 0, 'террейн': None}
+
+db = sqlite3.connect('sqlite_rand_enc_db.sqlite3')
+cursor = db.cursor()
+
+
+def sqlselect():
+    enc_roll = random.randint(3, 3)
+    global tkinter_result
+
+    select = f'''
+    SELECT DISTINCT main_event.name_event AS 'Ивент', enemies.enemy_name
+    FROM main_event
+    INNER JOIN event_terrain_relations ON main_event.name_event == event_terrain_relations.event_name
+    INNER JOIN terrain ON event_terrain_relations.terrain_name == terrain.terrain_name
+    INNER JOIN event_danger_relations ON main_event.name_event == event_danger_relations.event_name
+    INNER JOIN danger_zone ON event_danger_relations.danger_name == danger_zone.danger_name
+    INNER JOIN enemy_event_relations ON main_event.name_event == enemy_event_relations.event_name
+    INNER JOIN enemies ON enemy_event_relations.enemy_name == enemies.enemy_name
+    INNER JOIN event_luck ON main_event.luck_name == event_luck.luck_name
+    INNER JOIN type_event ON main_event.type_event_name == type_event.type_event_name
+   
+    WHERE (terrain.terrain_name == '{tkinter_result['террейн']}' OR terrain.terrain_name == 'Любой')
+    AND event_luck.min_luck <= '{enc_roll}' AND event_luck.max_luck >= '{enc_roll}'
+    AND (danger_zone.danger_name == '{tkinter_result['сложность']}' OR danger_zone.danger_name == 'Любая угроза')
+    AND (enemies.enemy_name == 'Друкхари' OR enemies.enemy_name == 'Демоны Хаоса' OR enemies.enemy_name == 'Никто')
+    '''
+
+    return select
 
 
 def start():
@@ -36,6 +64,7 @@ def start():
     checkbuttons()
     print(tkinter_result)
     table_obj.quit()
+    print(cursor.execute(sqlselect()).fetchall())
 
 
 def add_button_result_to_dict(event, button, method_name):
