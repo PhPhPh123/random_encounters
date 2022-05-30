@@ -2,21 +2,28 @@ import random
 import json
 import sqlite3
 from tkinter import *
-import jinja2
+from jinja2 import Template
 from tkinter.ttk import Combobox
 
-terrains = ('Пустыня',
-            'город-улей',
-            'имперский городок',
-            'имперские руины',
-            'тундра',
-            "ледяная пустошь")
+db = sqlite3.connect('sqlite_rand_enc_db.sqlite3')
+cursor = db.cursor()
 
-danger_level = ('красная угроза',
-                'фиолетовая угроза',
-                'синяя угроза',
-                'Зеленая угроза',
-                'неизвестная угроза')
+
+def name_enemies_func():
+    name_enemies = cursor.execute('SELECT enemy_name FROM enemies').fetchall()
+    return name_enemies
+
+
+def terrain_func():
+    name_terrain = cursor.execute('SELECT terrain_name FROM terrain').fetchall()
+    return name_terrain
+
+
+db_enemy_list = name_enemies_func()
+enemies = [x[0] for x in db_enemy_list]
+
+db_terrain_list = terrain_func()
+terrains = [x[0] for x in db_terrain_list]
 
 type_enc = ('боевое событие',
             'значимое событие',
@@ -25,20 +32,25 @@ type_enc = ('боевое событие',
 
 type_threat = ('0', '1', '2', '3', '4', '5')
 
-tkinter_result = {'угроза орков': 0, 'угроза хаоса': 0, 'угроза друкхари': 0,
-                  'угроза тиранидов': 0, 'угроза тау': 0, 'угроза некронов': 0,
-                  'угроза мутантов': 0, 'угроза малых рас': 0, 'угроза дикой природы': 0,
-                  'угроза стихийных бедствий': 0, 'угроза бандитов/мятежников': 0, 'террейн': None}
+danger_level = ('Нулевая угроза',
+                'Красная угроза',
+                'Фиолетовая угроза',
+                'Синяя угроза',
+                'Зеленая угроза')
 
-db = sqlite3.connect('sqlite_rand_enc_db.sqlite3')
-cursor = db.cursor()
+tkinter_result = {'угроза орков': '0', 'угроза хаоситов': '0', 'угроза друкхари': '0',
+                  'угроза тиранидов': '0', 'угроза тау': '0', 'угроза некронов': '0',
+                  'угроза мутантов': '0', 'угроза малых рас': '0', 'угроза дикой природы': '0',
+                  'угроза стихийных бедствий': '0', 'угроза бандитов': '0', 'угроза мятежников': '0',
+                  'угроза демонов': '0', 'террейн': None}
 
 
 def sqlselect():
     enc_roll = random.randint(3, 3)
     global tkinter_result
+    enemy_for_select = [keys for keys in tkinter_result if 'угроза' in keys and int(tkinter_result[keys]) > 0]
 
-    select = f'''
+    select_temp = Template('''
     SELECT DISTINCT main_event.name_event AS 'Ивент', enemies.enemy_name
     FROM main_event
     INNER JOIN event_terrain_relations ON main_event.name_event == event_terrain_relations.event_name
@@ -49,14 +61,21 @@ def sqlselect():
     INNER JOIN enemies ON enemy_event_relations.enemy_name == enemies.enemy_name
     INNER JOIN event_luck ON main_event.luck_name == event_luck.luck_name
     INNER JOIN type_event ON main_event.type_event_name == type_event.type_event_name
-   
-    WHERE (terrain.terrain_name == '{tkinter_result['террейн']}' OR terrain.terrain_name == 'Любой')
-    AND event_luck.min_luck <= '{enc_roll}' AND event_luck.max_luck >= '{enc_roll}'
-    AND (danger_zone.danger_name == '{tkinter_result['сложность']}' OR danger_zone.danger_name == 'Любая угроза')
-    AND (enemies.enemy_name == 'Друкхари' OR enemies.enemy_name == 'Демоны Хаоса' OR enemies.enemy_name == 'Никто')
-    '''
-
-    return select
+    WHERE (terrain.terrain_name == '{{ terrain }}' OR terrain.terrain_name == 'Любой')
+    AND event_luck.min_luck <= '{{ enc_roll }}' AND event_luck.max_luck >= '{{ enc_roll }}'
+    AND (danger_zone.danger_name == '{{ danger_zone }}' OR danger_zone.danger_name == 'Любая угроза')
+    AND (
+    {% for enemy in enemies %}
+        enemies.enemy_name == '{{ enemy }}' OR 
+    {% endfor %}
+        enemies.enemy_name == 'Никто')
+    ''')
+    select_render = select_temp.render(terrain=tkinter_result['террейн'],
+                                       enc_roll=enc_roll,
+                                       danger_zone=tkinter_result['сложность'],
+                                       enemies=enemy_for_select)
+    print(select_render)
+    return select_render
 
 
 def start():
@@ -159,7 +178,7 @@ class App(Frame):
         self.chaos_threat_combo = Combobox(self.win, values=type_threat)
         self.chaos_threat_combo.current(0)
         self.chaos_threat_combo.bind('<<ComboboxSelected>>',
-                                     lambda event: add_button_result_to_dict(event, 'угроза хаоса',
+                                     lambda event: add_button_result_to_dict(event, 'угроза хаоситов',
                                                                              'chaos_threat_result'))
         self.chaos_threat_combo.place(relwidth=0.1, relheight=0.1, relx=0.345, rely=0.18)
 
@@ -238,8 +257,8 @@ class App(Frame):
         '''
         Кнопка определяющая степень угрозы дикой природы на местности
         '''
-        self.wild_threat_name = Label(self.win, text='Дикая природа')
-        self.wild_threat_name.place(relx=0.545, rely=0.3)
+        self.wild_threat_name = Label(self.win, text='Дикие звери')
+        self.wild_threat_name.place(relx=0.55, rely=0.3)
         self.wild_threat_combo = Combobox(self.win, values=type_threat)
         self.wild_threat_combo.current(0)
         self.wild_threat_combo.bind('<<ComboboxSelected>>',
@@ -251,7 +270,7 @@ class App(Frame):
         Кнопка определяющая степень угрозы стихийных бедствий на местности
         '''
         self.disaster_threat_name = Label(self.win, text='Бедствия')
-        self.disaster_threat_name.place(relx=0.67, rely=0.3)
+        self.disaster_threat_name.place(relx=0.665, rely=0.3)
         self.disaster_threat_combo = Combobox(self.win, values=type_threat)
         self.disaster_threat_combo.current(0)
         self.disaster_threat_combo.bind('<<ComboboxSelected>>',
@@ -262,14 +281,38 @@ class App(Frame):
         '''
         Кнопка определяющая степень угрозы стихийных бедствий на местности
         '''
-        self.bandits_threat_name = Label(self.win, text='Бандиты/Мятежники')
+        self.bandits_threat_name = Label(self.win, text='Бандиты')
         self.bandits_threat_name.place(relx=0.75, rely=0.3)
         self.bandits_threat_combo = Combobox(self.win, values=type_threat)
         self.bandits_threat_combo.current(0)
         self.bandits_threat_combo.bind('<<ComboboxSelected>>',
-                                       lambda event: add_button_result_to_dict(event, 'угроза бандитов/мятежников',
+                                       lambda event: add_button_result_to_dict(event, 'угроза бандитов',
                                                                                'bandits_threat_result'))
         self.bandits_threat_combo.place(relwidth=0.1, relheight=0.1, relx=0.765, rely=0.38)
+
+        '''
+        Кнопка определяющая степень угрозы стихийных бедствий на местности
+        '''
+        self.rebels_threat_name = Label(self.win, text='Мятежники')
+        self.rebels_threat_name.place(relx=0.6, rely=0.48)
+        self.rebels_threat_combo = Combobox(self.win, values=type_threat)
+        self.rebels_threat_combo.current(0)
+        self.rebels_threat_combo.bind('<<ComboboxSelected>>',
+                                      lambda event: add_button_result_to_dict(event, 'угроза мятежников',
+                                                                              'rebels_threat_result'))
+        self.rebels_threat_combo.place(relwidth=0.1, relheight=0.1, relx=0.605, rely=0.56)
+
+        '''
+        Кнопка определяющая степень угрозы стихийных бедствий на местности
+        '''
+        self.demons_threat_name = Label(self.win, text='Демоны')
+        self.demons_threat_name.place(relx=0.295, rely=0.48)
+        self.demons_threat_combo = Combobox(self.win, values=type_threat)
+        self.demons_threat_combo.current(0)
+        self.demons_threat_combo.bind('<<ComboboxSelected>>',
+                                      lambda event: add_button_result_to_dict(event, 'угроза демонов',
+                                                                              'demons_threat_result'))
+        self.demons_threat_combo.place(relwidth=0.1, relheight=0.1, relx=0.295, rely=0.56)
 
         """
         Кнопки участвующих в событии игроков
@@ -364,6 +407,12 @@ class App(Frame):
 
     def bandits_threat_result(self):
         return self.bandits_threat_combo.get()
+
+    def rebels_threat_result(self):
+        return self.rebels_threat_combo.get()
+
+    def demons_threat_result(self):
+        return self.demons_threat_combo.get()
 
     def quit(self):
         self.win.destroy()
