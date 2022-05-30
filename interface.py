@@ -83,7 +83,8 @@ def start():
     checkbuttons()
     print(tkinter_result)
     table_obj.quit()
-    print(cursor.execute(sqlselect()).fetchall())
+    result_of_query = cursor.execute(sqlselect()).fetchall()
+    print(result_of_query)
 
 
 def add_button_result_to_dict(event, button, method_name):
@@ -246,7 +247,7 @@ class App(Frame):
         Кнопка определяющая степень угрозы малых фракций на местности
         '''
         self.small_races_threat_name = Label(self.win, text='Малые расы')
-        self.small_races_threat_name.place(relx=0.44, rely=0.3)
+        self.small_races_threat_name.place(relx=0.443, rely=0.3)
         self.small_races_threat_combo = Combobox(self.win, values=type_threat)
         self.small_races_threat_combo.current(0)
         self.small_races_threat_combo.bind('<<ComboboxSelected>>',
@@ -270,7 +271,7 @@ class App(Frame):
         Кнопка определяющая степень угрозы стихийных бедствий на местности
         '''
         self.disaster_threat_name = Label(self.win, text='Бедствия')
-        self.disaster_threat_name.place(relx=0.665, rely=0.3)
+        self.disaster_threat_name.place(relx=0.657, rely=0.3)
         self.disaster_threat_combo = Combobox(self.win, values=type_threat)
         self.disaster_threat_combo.current(0)
         self.disaster_threat_combo.bind('<<ComboboxSelected>>',
@@ -282,7 +283,7 @@ class App(Frame):
         Кнопка определяющая степень угрозы стихийных бедствий на местности
         '''
         self.bandits_threat_name = Label(self.win, text='Бандиты')
-        self.bandits_threat_name.place(relx=0.75, rely=0.3)
+        self.bandits_threat_name.place(relx=0.76, rely=0.3)
         self.bandits_threat_combo = Combobox(self.win, values=type_threat)
         self.bandits_threat_combo.current(0)
         self.bandits_threat_combo.bind('<<ComboboxSelected>>',
