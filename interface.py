@@ -51,7 +51,8 @@ def sqlselect():
     enemy_for_select = [keys for keys in tkinter_result if 'угроза' in keys and int(tkinter_result[keys]) > 0]
 
     select_temp = Template('''
-    SELECT DISTINCT main_event.name_event AS 'Ивент', enemies.enemy_name
+    SELECT DISTINCT main_event.name_event, enemies.enemy_name
+    
     FROM main_event
     INNER JOIN event_terrain_relations ON main_event.name_event == event_terrain_relations.event_name
     INNER JOIN terrain ON event_terrain_relations.terrain_name == terrain.terrain_name
@@ -61,6 +62,7 @@ def sqlselect():
     INNER JOIN enemies ON enemy_event_relations.enemy_name == enemies.enemy_name
     INNER JOIN event_luck ON main_event.luck_name == event_luck.luck_name
     INNER JOIN type_event ON main_event.type_event_name == type_event.type_event_name
+    
     WHERE (terrain.terrain_name == '{{ terrain }}' OR terrain.terrain_name == 'Любой')
     AND event_luck.min_luck <= '{{ enc_roll }}' AND event_luck.max_luck >= '{{ enc_roll }}'
     AND (danger_zone.danger_name == '{{ danger_zone }}' OR danger_zone.danger_name == 'Любая угроза')
@@ -174,7 +176,7 @@ class App(Frame):
         '''
         Кнопка определяющая степень угрозы хаоса на местности
         '''
-        self.chaos_threat_name = Label(self.win, text='Хаос')
+        self.chaos_threat_name = Label(self.win, text='Хаоситы')
         self.chaos_threat_name.place(relx=0.34, rely=0.08)
         self.chaos_threat_combo = Combobox(self.win, values=type_threat)
         self.chaos_threat_combo.current(0)
