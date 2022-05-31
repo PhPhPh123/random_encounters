@@ -25,10 +25,10 @@ enemies = [x[0] for x in db_enemy_list]
 db_terrain_list = terrain_func()
 terrains = [x[0] for x in db_terrain_list]
 
-type_enc = ('боевое событие',
+type_enc = ('случайное событие',
+            'боевое событие',
             'значимое событие',
-            'незначимое событие',
-            'случайное событие')
+            'незначимое событие')
 
 type_threat = ('0', '1', '2', '3', '4', '5')
 
@@ -42,13 +42,19 @@ tkinter_result = {'угроза орков': '0', 'угроза хаоситов
                   'угроза тиранидов': '0', 'угроза тау': '0', 'угроза некронов': '0',
                   'угроза мутантов': '0', 'угроза малых рас': '0', 'угроза дикой природы': '0',
                   'угроза стихийных бедствий': '0', 'угроза бандитов': '0', 'угроза мятежников': '0',
-                  'угроза демонов': '0', 'террейн': None}
+                  'угроза демонов': '0', 'террейн': None, 'сложность': None, 'тип события': 'случайное событие' }
 
 
 def sqlselect():
     enc_roll = random.randint(3, 3)
     global tkinter_result
+
     enemy_for_select = [keys for keys in tkinter_result if 'угроза' in keys and int(tkinter_result[keys]) > 0]
+
+    type_event = ''
+    if tkinter_result['тип события'] != 'случайное событие':
+        temp = tkinter_result['тип события']
+        type_event = f'AND type_event.type_event_name == \'{temp}\''
 
     select_temp = Template('''
     SELECT DISTINCT main_event.name_event, enemies.enemy_name
@@ -71,22 +77,30 @@ def sqlselect():
         enemies.enemy_name == '{{ enemy }}' OR 
     {% endfor %}
         enemies.enemy_name == 'Никто')
+    {{ type_event }} 
     ''')
     select_render = select_temp.render(terrain=tkinter_result['террейн'],
                                        enc_roll=enc_roll,
                                        danger_zone=tkinter_result['сложность'],
-                                       enemies=enemy_for_select)
-    print(select_render)
+                                       enemies=enemy_for_select,
+                                       type_event=type_event)
     return select_render
 
 
 def start():
     global tkinter_result
     checkbuttons()
-    print(tkinter_result)
     table_obj.quit()
     result_of_query = cursor.execute(sqlselect()).fetchall()
     print(result_of_query)
+    rand_select = random.choice(result_of_query)
+    text_res = ' '.join(rand_select)
+
+    win2 = Tk()
+    output = Text(win2)
+    output.insert(INSERT, text_res)
+    output.pack()
+    win2.mainloop()
 
 
 def add_button_result_to_dict(event, button, method_name):
@@ -151,6 +165,7 @@ class App(Frame):
         self.type_name = Label(self.win, text='Выберите тип события')
         self.type_name.place(relx=0.8, rely=0.6)
         self.type_combo = Combobox(self.win, values=type_enc)
+        self.type_combo.current(0)
         self.type_combo.bind('<<ComboboxSelected>>',
                              lambda event: add_button_result_to_dict(event, 'тип события', 'type_result'))
         self.type_combo.place(relwidth=0.2, relheight=0.1, relx=0.799, rely=0.7)
