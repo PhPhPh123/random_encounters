@@ -42,7 +42,8 @@ tkinter_result = {'угроза орков': '0', 'угроза хаоситов
                   'угроза тиранидов': '0', 'угроза тау': '0', 'угроза некронов': '0',
                   'угроза мутантов': '0', 'угроза малых рас': '0', 'угроза дикой природы': '0',
                   'угроза стихийных бедствий': '0', 'угроза бандитов': '0', 'угроза мятежников': '0',
-                  'угроза демонов': '0', 'террейн': None, 'сложность': None, 'тип события': 'случайное событие' }
+                  'угроза демонов': '0', 'террейн': None, 'сложность': None, 'тип события': 'случайное событие',
+                  'орг помогает': 0, 'орг серит': 0, 'душная награда': 0, 'щедрая награда': 0}
 
 
 def sqlselect():
@@ -87,14 +88,38 @@ def sqlselect():
     return select_render
 
 
+def create_list_for_randchoice():
+    global tkinter_result
+    result_of_query = cursor.execute(sqlselect()).fetchall()
+    list_result_of_query = []
+    for event in result_of_query:
+        list_result_of_query.append(dict(zip(('суть ивента', 'связанные враги'), event)))
+
+    for event in list_result_of_query:
+        if event['связанные враги'] != 'Никто':
+            value_for_dict_enemy = int(tkinter_result[event['связанные враги']]) + tkinter_result['общий дебафф'] - tkinter_result['общий бафф']
+            event['сила врагов'] = value_for_dict_enemy
+
+            value_for_dict_reward = random.randint(3, 18) + tkinter_result['душная награда'] - tkinter_result['щедрая награда']
+            event['лут с врагов и награда'] = value_for_dict_reward
+
+        event['удачливость события'] = random.randint(3, 18) + tkinter_result['общий дебафф'] - tkinter_result['общий бафф']
+        if event['удачливость события'] < 3:
+            event['удачливость события'] = 3
+        if event['удачливость события'] > 18:
+            event['удачливость события'] = 18
+
+    rand_select = random.choice(list_result_of_query)
+
+    return rand_select
+
+
 def start():
     global tkinter_result
+
     checkbuttons()
     table_obj.quit()
-    result_of_query = cursor.execute(sqlselect()).fetchall()
-    print(result_of_query)
-    rand_select = random.choice(result_of_query)
-    text_res = ' '.join(rand_select)
+    text_res = create_list_for_randchoice()
 
     win2 = Tk()
     output = Text(win2)
