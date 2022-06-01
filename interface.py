@@ -47,8 +47,12 @@ tkinter_result = {'угроза орков': '0', 'угроза хаоситов
 
 
 def sqlselect():
-    enc_roll = random.randint(3, 3)
     global tkinter_result
+    enc_roll = random.randint(3, 3) + tkinter_result['общий дебафф'] - tkinter_result['общий бафф']
+    if enc_roll > 18:
+        enc_roll = 18
+    if enc_roll < 3:
+        enc_roll = 3
 
     enemy_for_select = [keys for keys in tkinter_result if 'угроза' in keys and int(tkinter_result[keys]) > 0]
 
@@ -100,10 +104,10 @@ def create_list_for_randchoice():
             value_for_dict_enemy = int(tkinter_result[event['связанные враги']]) + tkinter_result['общий дебафф'] - tkinter_result['общий бафф']
             event['сила врагов'] = value_for_dict_enemy
 
-            value_for_dict_reward = random.randint(3, 18) + tkinter_result['дебафф награды'] - tkinter_result['бафф награды']
+            value_for_dict_reward = random.randint(3, 18) + (tkinter_result['дебафф награды'] * 2) - (tkinter_result['бафф награды'] * 2)
             event['лут с врагов и награда'] = value_for_dict_reward
 
-        event['удачливость события'] = random.randint(3, 18) + tkinter_result['общий дебафф'] - tkinter_result['общий бафф']
+        event['удачливость события'] = random.randint(3, 18) + (tkinter_result['общий дебафф'] * 2) - (tkinter_result['общий бафф'] * 2)
         if event['удачливость события'] < 3:
             event['удачливость события'] = 3
         if event['удачливость события'] > 18:
