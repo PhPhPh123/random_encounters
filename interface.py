@@ -43,7 +43,7 @@ tkinter_result = {'угроза орков': '0', 'угроза хаоситов
                   'угроза мутантов': '0', 'угроза малых рас': '0', 'угроза дикой природы': '0',
                   'угроза стихийных бедствий': '0', 'угроза бандитов': '0', 'угроза мятежников': '0',
                   'угроза демонов': '0', 'террейн': None, 'сложность': None, 'тип события': 'случайное событие',
-                  'орг помогает': 0, 'орг серит': 0, 'душная награда': 0, 'щедрая награда': 0}
+                  'общий бафф': 0, 'общий дебафф': 0, 'дебафф награды': 0, 'бафф награды': 0}
 
 
 def sqlselect():
@@ -100,7 +100,7 @@ def create_list_for_randchoice():
             value_for_dict_enemy = int(tkinter_result[event['связанные враги']]) + tkinter_result['общий дебафф'] - tkinter_result['общий бафф']
             event['сила врагов'] = value_for_dict_enemy
 
-            value_for_dict_reward = random.randint(3, 18) + tkinter_result['душная награда'] - tkinter_result['щедрая награда']
+            value_for_dict_reward = random.randint(3, 18) + tkinter_result['дебафф награды'] - tkinter_result['бафф награды']
             event['лут с врагов и награда'] = value_for_dict_reward
 
         event['удачливость события'] = random.randint(3, 18) + tkinter_result['общий дебафф'] - tkinter_result['общий бафф']
@@ -116,11 +116,12 @@ def create_list_for_randchoice():
 
 def start():
     global tkinter_result
-
     checkbuttons()
     table_obj.quit()
     text_res = create_list_for_randchoice()
+    print(tkinter_result['бафф награды'])
 
+    print(tkinter_result)
     win2 = Tk()
     output = Text(win2)
     output.insert(INSERT, text_res)
@@ -386,7 +387,7 @@ class App(Frame):
         """
         Кнопки, позволяющие ГМу вносить изменения, улучшающие или ухудшающие результат события
         """
-        self.gm_lab = Label(self.win, text='Кнопки, серящие или мошнящие под игроков')
+        self.gm_lab = Label(self.win, text='ГМ-ские кнопки, вносящие корректировки в броски кубика')
         self.gm_lab.place(relx=0.3, rely=0.8)
 
         self.debuff1_status = IntVar()
