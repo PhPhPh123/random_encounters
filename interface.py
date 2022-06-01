@@ -119,9 +119,7 @@ def start():
     checkbuttons()
     table_obj.quit()
     text_res = create_list_for_randchoice()
-    print(tkinter_result['бафф награды'])
 
-    print(tkinter_result)
     win2 = Tk()
     output = Text(win2)
     output.insert(INSERT, text_res)
