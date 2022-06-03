@@ -9,18 +9,10 @@ db = sqlite3.connect('sqlite_rand_enc_db.sqlite3')
 cursor = db.cursor()
 
 
-def name_enemies_func():
-    name_enemies = cursor.execute('SELECT enemy_name FROM enemies').fetchall()
-    return name_enemies
-
-
 def terrain_func():
     name_terrain = cursor.execute('SELECT terrain_name FROM terrain').fetchall()
     return name_terrain
 
-
-db_enemy_list = name_enemies_func()
-enemies = [x[0] for x in db_enemy_list]
 
 db_terrain_list = terrain_func()
 terrains = [x[0] for x in db_terrain_list]
@@ -126,7 +118,7 @@ def start():
 
     win2 = Tk()
     output = Text(win2)
-    output.insert(INSERT, text_res)
+    output.insert(INSERT, str(text_res))
     output.pack()
     win2.mainloop()
 
