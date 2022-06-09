@@ -5,31 +5,32 @@ from tkinter import *
 from jinja2 import Template
 from tkinter.ttk import Combobox
 
-db = sqlite3.connect('sqlite_rand_enc_db.sqlite3')
-cursor = db.cursor()
+db = sqlite3.connect('sqlite_rand_enc_db.sqlite3')  # connect to sql base
+cursor = db.cursor()  # Creation sqlite cursor
 
 
-def terrain_func():
+def terrain_func():  # This func need to create all terrain names to use them in tkinter combobox
     name_terrain = cursor.execute('SELECT terrain_name FROM terrain').fetchall()
     return name_terrain
 
 
-db_terrain_list = terrain_func()
-terrains = [x[0] for x in db_terrain_list]
+db_terrain_list = terrain_func()  # tuples after sql query
+terrains = [x[0] for x in db_terrain_list]  # making normal list
 
-type_enc = ('случайное событие',
+type_enc = ('случайное событие',  # base type of events using in tkinter combobox
             'боевое событие',
             'значимое событие',
             'незначимое событие')
 
-type_threat = ('0', '1', '2', '3', '4', '5')
+type_threat = ('0', '1', '2', '3', '4', '5')  # levels of threat using in tkinter threat comboboxes
 
-danger_level = ('Нулевая угроза',
+danger_level = ('Нулевая угроза',  # levels of danger in zone
                 'Красная угроза',
                 'Фиолетовая угроза',
                 'Синяя угроза',
                 'Зеленая угроза')
 
+# global dict with values by default. this is final result of tkinter class, using in sql-query
 tkinter_result = {'угроза орков': '0', 'угроза хаоситов': '0', 'угроза друкхари': '0',
                   'угроза тиранидов': '0', 'угроза тау': '0', 'угроза некронов': '0',
                   'угроза мутантов': '0', 'угроза малых рас': '0', 'угроза дикой природы': '0',
@@ -38,13 +39,22 @@ tkinter_result = {'угроза орков': '0', 'угроза хаоситов
                   'общий бафф': 0, 'общий дебафф': 0, 'дебафф награды': 0, 'бафф награды': 0}
 
 
+'''
+это основная функция создающая sql запрос и возвращающая его результат в текстовом виде для использования
+она возвращает список из двух стобцов, показывающий имя ивента
+'''
+
+
 def sqlselect():
     global tkinter_result
-    enc_roll = random.randint(3, 3) + tkinter_result['общий дебафф'] - tkinter_result['общий бафф']
+    enc_roll = random.randint(15, 18) + tkinter_result['общий дебафф'] - tkinter_result['общий бафф']
     if enc_roll > 18:
         enc_roll = 18
     if enc_roll < 3:
         enc_roll = 3
+
+    if tkinter_result['тип события'] == 'боевое событие':
+        enc_roll = random.randint(15, 18)
 
     enemy_for_select = [keys for keys in tkinter_result if 'угроза' in keys and int(tkinter_result[keys]) > 0]
 
@@ -81,6 +91,7 @@ def sqlselect():
                                        danger_zone=tkinter_result['сложность'],
                                        enemies=enemy_for_select,
                                        type_event=type_event)
+    print(select_render)
     return select_render
 
 
@@ -88,18 +99,22 @@ def create_list_for_randchoice():
     global tkinter_result
     result_of_query = cursor.execute(sqlselect()).fetchall()
     list_result_of_query = []
+    print(result_of_query)
     for event in result_of_query:
         list_result_of_query.append(dict(zip(('суть ивента', 'связанные враги'), event)))
 
     for event in list_result_of_query:
         if event['связанные враги'] != 'Никто':
-            value_for_dict_enemy = int(tkinter_result[event['связанные враги']]) + tkinter_result['общий дебафф'] - tkinter_result['общий бафф']
+            value_for_dict_enemy = int(tkinter_result[event['связанные враги']]) + tkinter_result['общий дебафф'] - \
+                                   tkinter_result['общий бафф']
             event['сила врагов'] = value_for_dict_enemy
 
-            value_for_dict_reward = random.randint(3, 18) + (tkinter_result['дебафф награды'] * 2) - (tkinter_result['бафф награды'] * 2)
+            value_for_dict_reward = random.randint(3, 18) + (tkinter_result['дебафф награды'] * 2) - (
+                    tkinter_result['бафф награды'] * 2)
             event['лут с врагов и награда'] = value_for_dict_reward
 
-        event['удачливость события'] = random.randint(3, 18) + (tkinter_result['общий дебафф'] * 2) - (tkinter_result['общий бафф'] * 2)
+        event['удачливость события'] = random.randint(3, 18) + (tkinter_result['общий дебафф'] * 2) - (
+                tkinter_result['общий бафф'] * 2)
         if event['удачливость события'] < 3:
             event['удачливость события'] = 3
         if event['удачливость события'] > 18:
