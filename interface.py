@@ -4,6 +4,7 @@ import sqlite3
 from tkinter import *
 from jinja2 import Template
 from tkinter.ttk import Combobox
+import tkinter.messagebox as tkm
 
 db = sqlite3.connect('sqlite_rand_enc_db.sqlite3')  # connect to sql base
 cursor = db.cursor()  # Creation sqlite cursor
@@ -128,25 +129,36 @@ def create_list_for_randchoice():
 
 def start():
     """
-    Данная функция управляет и соединяет 3 основных этапы работы и начинает выполняться при нажатии кнопки START.
+    Данная функция управляет и соединяет 4 основных этапы работы и начинает выполняться при нажатии кнопки START.
     Этапы разделены пробелами
     """
-    # Первый этап это окончательное формирование словаря на основе выборов из графического интерфеса
     global tkinter_result
-    checkbuttons()
-    table_obj.quit()
 
-    # Второй этап это создание на основе словаря sql-запроса, а затем выбор случайного события
-    text_res = create_list_for_randchoice()
+    # Первый этап. Проверка на полную и корректную заполненность данных
 
-    # Третий этап это формирование текстового графического отображения результатов случайного события и
-    # выведение его на экран
-    win2 = Tk()
-    output = Text(win2)
-    for string in text_res:
-        output.insert(INSERT, f'{str(string)} : {str(text_res[string])}\n\n')
-    output.pack()
-    win2.mainloop()
+    # Без выбора сложности и террайна - нельзя
+    if not tkinter_result['сложность'] or not tkinter_result['террейн']:
+        tkm.showwarning('Неполные данные', 'Нужно заполнить\nМесто действия и\nуровень угрозы')
+    # Выбирать одновременно нулевую игрозу и боевое событие - нельзя т.к. результат будет пустой
+    elif tkinter_result['сложность'] == 'Нулевая угроза' and tkinter_result['тип события'] == 'боевое событие':
+        tkm.showwarning('Конфликт выбора', 'Нельзя одновременно\nвыбирать нулевую\nугрозу и\nбоевое событие')
+
+    else:
+        # Второй этап. Окончательное формирование словаря на основе выборов из графического интерфеса
+        checkbuttons()
+        table_obj.quit()
+
+        # Третий этап. Создание на основе словаря sql-запроса, а затем выбор случайного события
+        text_res = create_list_for_randchoice()
+
+        # Четвертый этап. Формирование текстового графического отображения результатов случайного события и
+        # выведение его на экран
+        win2 = Tk()
+        output = Text(win2)
+        for string in text_res:
+            output.insert(INSERT, f'{str(string)} : {str(text_res[string])}\n\n')
+        output.pack()
+        win2.mainloop()
 
 
 def add_button_result_to_dict(event, button: str, method_name: str):
