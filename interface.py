@@ -64,7 +64,7 @@ def sqlselect():
         type_event = f'AND type_event.type_event_name == \'{temp}\''
 
     select_temp = Template('''
-    SELECT DISTINCT main_event.name_event, enemies.enemy_name, main_event.text_event
+    SELECT DISTINCT main_event.name_event, type_event.type_event_name, enemies.enemy_name, main_event.text_event
     
     FROM main_event
     INNER JOIN event_terrain_relations ON main_event.name_event == event_terrain_relations.event_name
@@ -96,13 +96,17 @@ def sqlselect():
 
 def create_list_for_randchoice():
     global tkinter_result
-    result_of_query = cursor.execute(sqlselect()).fetchall()
-    list_result_of_query = []
-    for event in result_of_query:
-        list_result_of_query.append(dict(zip(('суть события', 'связанные враги', 'доп. детали'), event)))
+    result_of_query = cursor.execute(sqlselect()).fetchall()  # собираю все значения sql отбора и отображаю их все
+    list_result_of_query = []  # список в который будут добавлять словари ключ: значение из sql-отбора
+    for event in result_of_query:  # связываю результаты sql-отбора с названиями для ключей для отображения
+        # добавляю получившиеся связанные значения в список. Словарь нужен в т.ч. чтобы вносить далее изменения в него
+        list_result_of_query.append(dict(zip(('суть события', 'тип события', 'связанные враги', 'доп.детали'), event)))
 
+    # Ниже будут вноситься изменения в список для добавления большей информативности в отчет
     for event in list_result_of_query:
-        if event['связанные враги'] != 'Никто':
+        # Условие необходимо, чтобы в словарь событий не попадали ключ-значения, которые не должны быть небоевых
+        # событиях
+        if event['тип события'] == 'боевое событие':
             value_for_dict_enemy = int(tkinter_result[event['связанные враги']]) + tkinter_result['общий дебафф'] - \
                                    tkinter_result['общий бафф']
             event['сила врагов'] = value_for_dict_enemy
