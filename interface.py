@@ -64,7 +64,7 @@ def sqlselect():
         type_event = f'AND type_event.type_event_name == \'{temp}\''
 
     select_temp = Template('''
-    SELECT DISTINCT main_event.name_event, enemies.enemy_name
+    SELECT DISTINCT main_event.name_event, enemies.enemy_name, main_event.text_event
     
     FROM main_event
     INNER JOIN event_terrain_relations ON main_event.name_event == event_terrain_relations.event_name
@@ -91,7 +91,6 @@ def sqlselect():
                                        danger_zone=tkinter_result['сложность'],
                                        enemies=enemy_for_select,
                                        type_event=type_event)
-    print(select_render)
     return select_render
 
 
@@ -99,9 +98,8 @@ def create_list_for_randchoice():
     global tkinter_result
     result_of_query = cursor.execute(sqlselect()).fetchall()
     list_result_of_query = []
-    print(result_of_query)
     for event in result_of_query:
-        list_result_of_query.append(dict(zip(('суть ивента', 'связанные враги'), event)))
+        list_result_of_query.append(dict(zip(('суть события', 'связанные враги', 'доп. детали'), event)))
 
     for event in list_result_of_query:
         if event['связанные враги'] != 'Никто':
@@ -133,7 +131,8 @@ def start():
 
     win2 = Tk()
     output = Text(win2)
-    output.insert(INSERT, str(text_res))
+    for string in text_res:
+        output.insert(INSERT, f'{str(string)} : {str(text_res[string])}\n\n')
     output.pack()
     win2.mainloop()
 
