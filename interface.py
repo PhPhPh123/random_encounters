@@ -46,7 +46,7 @@ tkinter_result = {'угроза орков': '0', 'угроза хаоситов
 
 def sqlselect():
     global tkinter_result
-    enc_roll = random.randint(15, 18) + tkinter_result['общий дебафф'] - tkinter_result['общий бафф']
+    enc_roll = random.randint(3, 18) + tkinter_result['общий дебафф'] - tkinter_result['общий бафф']
     if enc_roll > 18:
         enc_roll = 18
     if enc_roll < 3:
