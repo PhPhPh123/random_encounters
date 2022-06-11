@@ -1,5 +1,5 @@
-from interface import start, create_list_for_randchoice, sql_select, terrain_func
-from interface import type_enc, type_threat, danger_level, terrains, abspath
+from interface import create_list_for_randchoice, sql_select, terrain_func
+from interface import type_enc, danger_level, terrains, abspath
 import random
 import sqlite3
 from unittest import TestCase, main
@@ -30,7 +30,7 @@ test_ttk = {'угроза орков': str(random.randint(0, 5)),
             'бафф награды': random.randint(0, 1)}
 
 
-class enc_testing(TestCase):
+class EncTesting(TestCase):
     def test_query(self):
         for _ in range(1000):
             res = create_list_for_randchoice(test_ttk)
@@ -42,6 +42,6 @@ class enc_testing(TestCase):
 
 
 if __name__ == '__main__':
-    tst = enc_testing()
+    tst = EncTesting()
     tst.test_query()
     print('Тест завершен')
