@@ -5,8 +5,18 @@ from tkinter import *
 from jinja2 import Template
 from tkinter.ttk import Combobox
 import tkinter.messagebox as tkm
+from os import path
 
-db = sqlite3.connect('sqlite_rand_enc_db.sqlite3')  # connect to sql base
+
+def get_script_dir():
+    abs_path = path.abspath(__file__)  # полный путь к файлу скрипта
+    return path.dirname(abs_path)
+
+
+db_name = 'sqlite_rand_enc_db.sqlite3'
+abspath = get_script_dir()+path.sep+db_name
+
+db = sqlite3.connect(abspath)  # connect to sql base
 cursor = db.cursor()  # Creation sqlite cursor
 
 
@@ -15,8 +25,7 @@ def terrain_func():  # This func need to create all terrain names to use them in
     return name_terrain
 
 
-db_terrain_list = terrain_func()  # tuples after sql query
-terrains = [x[0] for x in db_terrain_list]  # making normal list
+terrains = [x[0] for x in terrain_func()]  # making normal list
 
 type_enc = ('случайное событие',  # base type of events using in tkinter combobox
             'боевое событие',
@@ -32,35 +41,48 @@ danger_level = ('Нулевая угроза',  # levels of danger in zone
                 'Зеленая угроза')
 
 # global dict with values by default. this is final result of tkinter class, using in sql-query
-tkinter_result = {'угроза орков': '0', 'угроза хаоситов': '0', 'угроза друкхари': '0',
-                  'угроза тиранидов': '0', 'угроза тау': '0', 'угроза некронов': '0',
-                  'угроза мутантов': '0', 'угроза малых рас': '0', 'угроза дикой природы': '0',
-                  'угроза стихийных бедствий': '0', 'угроза бандитов': '0', 'угроза мятежников': '0',
-                  'угроза демонов': '0', 'террейн': None, 'сложность': None, 'тип события': 'случайное событие',
-                  'общий бафф': 0, 'общий дебафф': 0, 'дебафф награды': 0, 'бафф награды': 0}
+tkinter_result = {'угроза орков': '0',
+                  'угроза хаоситов': '0',
+                  'угроза друкхари': '0',
+                  'угроза тиранидов': '0',
+                  'угроза тау': '0',
+                  'угроза некронов': '0',
+                  'угроза мутантов': '0',
+                  'угроза малых рас': '0',
+                  'угроза дикой природы': '0',
+                  'угроза стихийных бедствий': '0',
+                  'угроза бандитов': '0',
+                  'угроза мятежников': '0',
+                  'угроза демонов': '0',
+                  'террейн': None,
+                  'сложность': None,
+                  'тип события': 'случайное событие',
+                  'общий бафф': 0,
+                  'общий дебафф': 0,
+                  'дебафф награды': 0,
+                  'бафф награды': 0}
 
-'''
-это основная функция создающая sql запрос и возвращающая его результат в текстовом виде для использования
-она возвращает список из двух стобцов, показывающий имя ивента
-'''
 
+def sqlselect(ttk_list):
+    """
+    это основная функция создающая sql запрос и возвращающая его результат в текстовом виде для использования
+    :return: она возвращает список из двух стобцов, показывающий имя ивента
+    """
 
-def sqlselect():
-    global tkinter_result
-    enc_roll = random.randint(3, 18) + tkinter_result['общий дебафф'] - tkinter_result['общий бафф']
+    enc_roll = random.randint(3, 18) + ttk_list['общий дебафф'] - ttk_list['общий бафф']
     if enc_roll > 18:
         enc_roll = 18
     if enc_roll < 3:
         enc_roll = 3
 
-    if tkinter_result['тип события'] == 'боевое событие':
-        enc_roll = random.randint(15, 18)
+    if ttk_list['тип события'] == 'боевое событие':
+        enc_roll = random.choice([3, 15, 16, 17, 18])
 
-    enemy_for_select = [keys for keys in tkinter_result if 'угроза' in keys and int(tkinter_result[keys]) > 0]
+    enemy_for_select = [keys for keys in ttk_list if 'угроза' in keys and int(ttk_list[keys]) > 0]
 
     type_event = ''
-    if tkinter_result['тип события'] != 'случайное событие':
-        temp = tkinter_result['тип события']
+    if ttk_list['тип события'] != 'случайное событие':
+        temp = ttk_list['тип события']
         type_event = f'AND type_event.type_event_name == \'{temp}\''
 
     select_temp = Template('''
@@ -86,17 +108,17 @@ def sqlselect():
         enemies.enemy_name == 'Никто')
     {{ type_event }} 
     ''')
-    select_render = select_temp.render(terrain=tkinter_result['террейн'],
+    select_render = select_temp.render(terrain=ttk_list['террейн'],
                                        enc_roll=enc_roll,
-                                       danger_zone=tkinter_result['сложность'],
+                                       danger_zone=ttk_list['сложность'],
                                        enemies=enemy_for_select,
                                        type_event=type_event)
     return select_render
 
 
-def create_list_for_randchoice():
-    global tkinter_result
-    result_of_query = cursor.execute(sqlselect()).fetchall()  # собираю все значения sql отбора и отображаю их все
+def create_list_for_randchoice(ttk_list):
+
+    result_of_query = cursor.execute(sqlselect(ttk_list)).fetchall()  # собираю все значения sql отбора и отображаю их все
     list_result_of_query = []  # список в который будут добавлять словари ключ: значение из sql-отбора
     for event in result_of_query:  # связываю результаты sql-отбора с названиями для ключей для отображения
         # Добавляю получившиеся связанные значения в список. Словарь нужен в т.ч. чтобы вносить далее изменения в него
@@ -107,16 +129,16 @@ def create_list_for_randchoice():
         # Условие необходимо, чтобы в словарь событий не попадали ключ-значения, которые не должны быть в небоевых
         # событиях, а именно сила врагов и лут с врагов т.к. в небоевых событиях врагов - нет
         if event['тип события'] == 'боевое событие':
-            value_for_dict_enemy = int(tkinter_result[event['связанные враги']]) + tkinter_result['общий дебафф'] - \
-                                   tkinter_result['общий бафф']
+            value_for_dict_enemy = int(ttk_list[event['связанные враги']]) + ttk_list['общий дебафф'] - \
+                                   ttk_list['общий бафф']
             event['сила врагов'] = value_for_dict_enemy
 
-            value_for_dict_reward = random.randint(3, 18) + (tkinter_result['дебафф награды'] * 2) - (
-                    tkinter_result['бафф награды'] * 2)
+            value_for_dict_reward = random.randint(3, 18) + (ttk_list['дебафф награды'] * 2) - (
+                    ttk_list['бафф награды'] * 2)
             event['лут с врагов и награда'] = value_for_dict_reward
 
-        event['удачливость события'] = random.randint(3, 18) + (tkinter_result['общий дебафф'] * 2) - (
-                tkinter_result['общий бафф'] * 2)
+        event['удачливость события'] = random.randint(3, 18) + (ttk_list['общий дебафф'] * 2) - (
+                ttk_list['общий бафф'] * 2)
         if event['удачливость события'] < 3:
             event['удачливость события'] = 3
         if event['удачливость события'] > 18:
@@ -151,16 +173,17 @@ def start():
         table_obj.quit()
 
         # Третий этап. Создание на основе словаря sql-запроса, а затем выбор случайного события
-        text_res = create_list_for_randchoice()
+        text_res = create_list_for_randchoice(tkinter_result)
 
         # Четвертый этап. Формирование текстового графического отображения результатов случайного события и
-        # выведение его на экран
-        win2 = Tk()
-        output = Text(win2)
-        for string in text_res:
-            output.insert(INSERT, f'{str(string)} : {str(text_res[string])}\n\n')
-        output.pack()
-        win2.mainloop()
+        # выведение его на экран. Конструкция name-main нужна, чтобы при тестировании отборов не выполнялось отображение
+        if __name__ == '__main__':
+            win2 = Tk()
+            output = Text(win2)
+            for string in text_res:
+                output.insert(INSERT, f'{str(string)} : {str(text_res[string])}\n\n')
+            output.pack()
+            win2.mainloop()
 
 
 def add_button_result_to_dict(event, button: str, method_name: str):
