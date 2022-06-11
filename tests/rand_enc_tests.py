@@ -1,4 +1,4 @@
-from interface import start, create_list_for_randchoice, sqlselect, terrain_func
+from interface import start, create_list_for_randchoice, sql_select, terrain_func
 from interface import type_enc, type_threat, danger_level, terrains, abspath
 import random
 import sqlite3
