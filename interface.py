@@ -1,5 +1,4 @@
 import random
-import json
 import sqlite3
 from tkinter import *
 from jinja2 import Template
@@ -8,7 +7,7 @@ import tkinter.messagebox as tkm
 from os import path
 
 
-def get_script_dir():
+def get_script_dir() -> str:
     """
     Функция собирающая абсолютный путь к текущей директории
     :return: возвращает этот путь
@@ -24,7 +23,7 @@ db = sqlite3.connect(abspath)  # connect to sql base
 cursor = db.cursor()  # Creation sqlite cursor
 
 
-def terrain_func():  # This func need to create all terrain names to use them in tkinter combobox
+def terrain_func() -> list:  # This func need to create all terrain names to use them in tkinter combobox
     name_terrain = cursor.execute('SELECT terrain_name FROM terrain').fetchall()
     return name_terrain
 
@@ -69,7 +68,7 @@ tkinter_result = {'угроза орков': '0',  # Все параметры �
                   'бафф награды': 0}
 
 
-def sql_select(ttk_list):
+def sql_select(ttk_list: dict) -> str:
     """
     это основная функция создающая sql запрос и возвращающая его результат в текстовом виде для использования
     :return: она возвращает список из двух стобцов, показывающий имя ивента
@@ -134,7 +133,7 @@ def sql_select(ttk_list):
     return select_render
 
 
-def create_list_for_randchoice(ttk_list):
+def create_list_for_randchoice(ttk_list: dict) -> dict:
     result_of_query = cursor.execute(
         sql_select(ttk_list)).fetchall()  # собираю все значения sql отбора и отображаю их все
     list_result_of_query = []  # список в который будут добавлять словари ключ: значение из sql-отбора
@@ -177,7 +176,7 @@ def create_list_for_randchoice(ttk_list):
     return rand_select
 
 
-def start():
+def start() -> None:
     """
     Данная функция управляет и соединяет 4 основных этапы работы и начинает выполняться при нажатии кнопки START.
     Этапы разделены пробелами
@@ -215,21 +214,17 @@ def start():
             win2.mainloop()
 
 
-def add_button_result_to_dict(event, button: str, method_name: str):
+def add_button_result_to_dict(event, button: str, combobox_name: str) -> None:
     """Данная функция добавляет результаты кнопок(все комбобоксы) в глобальный словарь результатов работы интерфейса
     :param event: стандартный аргумент под параметр command классов tkinter, не функции не используется
     :param button: строковое название кнопки
-    :param method_name: строковое название метода, которое будет вызвано через __getattribute__ для вызова метода get и
-    получения результатов выбора кнопок, для добавления их в итоговый славарь
+    :param combobox_name: строковое название метода, который будет использоваться для get-метода комбобокса
     :return: None
     """
     global tkinter_result
 
-    # Получаю аттрибут из объекта класса окна граф. Интефейса на основе строкового аргумента переданного названия метода
-    result = table_obj.__getattribute__(method_name)
-
     # Вызываю метод необходимого аттрибута, который возвращает мне нужное значение
-    dict_res = result()
+    dict_res = universal_get(combobox_name)
 
     # Добавляю или изменяю в глобальном словаре tkinter_result вложенные словари в котором ключ это переданный аргумент
     # button, а значение это результат того, что вернулось из методов result-методов и дефакто является выбранным в
@@ -237,7 +232,7 @@ def add_button_result_to_dict(event, button: str, method_name: str):
     tkinter_result[button] = dict_res
 
 
-def check_buttons():
+def check_buttons() -> None:
     """
     Данная функция собирает значения чекбоксов и добавляет их в глобальный список результата работы интерфейса
     :return: None
@@ -254,6 +249,16 @@ def check_buttons():
 
     tkinter_result['дебафф награды'] = table_obj.debuff2_status.get()
     tkinter_result['бафф награды'] = table_obj.buff2_status.get()
+
+
+def universal_get(get_name: str):
+    """
+    Функция вызывает метод get для комбобоксов, чтобы получить результаты их выборов
+    :param get_name: строковое название конкретного комбобокса, которому будет вызываться метод
+    :return: вызов функции get для получения итогового результата выбора combobox
+    """
+    combo_name = table_obj.__getattribute__(get_name)
+    return combo_name.get()
 
 
 class App(Frame):
@@ -288,7 +293,9 @@ class App(Frame):
         self.ter_name.place(relwidth=0.2, relheight=0.1, relx=0.001, rely=0.0)
         self.terrain_combo = Combobox(self.win, values=terrains)
         self.terrain_combo.bind('<<ComboboxSelected>>',
-                                lambda event: add_button_result_to_dict(event, 'террейн', 'terrain_result'))
+                                lambda event: add_button_result_to_dict(event,
+                                                                        'террейн',
+                                                                        'terrain_combo'))
         self.terrain_combo.place(relwidth=0.2, relheight=0.1, relx=0.001, rely=0.1)
 
         """
@@ -298,7 +305,9 @@ class App(Frame):
         self.dang_name.place(relx=0.78, rely=0)
         self.danger_combo = Combobox(self.win, values=danger_level)
         self.danger_combo.bind('<<ComboboxSelected>>',
-                               lambda event: add_button_result_to_dict(event, 'сложность', 'danger_result'))
+                               lambda event: add_button_result_to_dict(event,
+                                                                       'сложность',
+                                                                       'danger_combo'))
         self.danger_combo.place(relwidth=0.2, relheight=0.1, relx=0.799, rely=0.1)
 
         '''
@@ -309,7 +318,9 @@ class App(Frame):
         self.type_combo = Combobox(self.win, values=type_enc)
         self.type_combo.current(0)
         self.type_combo.bind('<<ComboboxSelected>>',
-                             lambda event: add_button_result_to_dict(event, 'тип события', 'type_result'))
+                             lambda event: add_button_result_to_dict(event,
+                                                                     'тип события',
+                                                                     'type_combo '))
         self.type_combo.place(relwidth=0.2, relheight=0.1, relx=0.799, rely=0.7)
 
         '''
@@ -326,8 +337,9 @@ class App(Frame):
         self.orcs_threat_combo = Combobox(self.win, values=type_threat)
         self.orcs_threat_combo.current(0)
         self.orcs_threat_combo.bind('<<ComboboxSelected>>',
-                                    lambda event: add_button_result_to_dict(event, 'угроза орков',
-                                                                            'orcs_threat_result'))
+                                    lambda event: add_button_result_to_dict(event,
+                                                                            'угроза орков',
+                                                                            'orcs_threat_combo'))
         self.orcs_threat_combo.place(relwidth=0.1, relheight=0.1, relx=0.24, rely=0.18)
 
         '''
@@ -338,8 +350,9 @@ class App(Frame):
         self.chaos_threat_combo = Combobox(self.win, values=type_threat)
         self.chaos_threat_combo.current(0)
         self.chaos_threat_combo.bind('<<ComboboxSelected>>',
-                                     lambda event: add_button_result_to_dict(event, 'угроза хаоситов',
-                                                                             'chaos_threat_result'))
+                                     lambda event: add_button_result_to_dict(event,
+                                                                             'угроза хаоситов',
+                                                                             'chaos_threat_combo'))
         self.chaos_threat_combo.place(relwidth=0.1, relheight=0.1, relx=0.345, rely=0.18)
 
         '''
@@ -350,8 +363,9 @@ class App(Frame):
         self.t_elves_threat_combo = Combobox(self.win, values=type_threat)
         self.t_elves_threat_combo.current(0)
         self.t_elves_threat_combo.bind('<<ComboboxSelected>>',
-                                       lambda event: add_button_result_to_dict(event, 'угроза друкхари',
-                                                                               't_elves_threat_result'))
+                                       lambda event: add_button_result_to_dict(event,
+                                                                               'угроза друкхари',
+                                                                               't_elves_threat_combo'))
         self.t_elves_threat_combo.place(relwidth=0.1, relheight=0.1, relx=0.45, rely=0.18)
 
         '''
@@ -362,8 +376,9 @@ class App(Frame):
         self.tyranids_threat_combo = Combobox(self.win, values=type_threat)
         self.tyranids_threat_combo.current(0)
         self.tyranids_threat_combo.bind('<<ComboboxSelected>>',
-                                        lambda event: add_button_result_to_dict(event, 'угроза тиранидов',
-                                                                                'tyranids_threat_result'))
+                                        lambda event: add_button_result_to_dict(event,
+                                                                                'угроза тиранидов',
+                                                                                'tyranids_threat_combo'))
         self.tyranids_threat_combo.place(relwidth=0.1, relheight=0.1, relx=0.555, rely=0.18)
 
         '''
@@ -374,8 +389,9 @@ class App(Frame):
         self.tau_threat_combo = Combobox(self.win, values=type_threat)
         self.tau_threat_combo.current(0)
         self.tau_threat_combo.bind('<<ComboboxSelected>>',
-                                   lambda event: add_button_result_to_dict(event, 'угроза тау',
-                                                                           'tau_threat_result'))
+                                   lambda event: add_button_result_to_dict(event,
+                                                                           'угроза тау',
+                                                                           'tau_threat_combo'))
         self.tau_threat_combo.place(relwidth=0.1, relheight=0.1, relx=0.66, rely=0.18)
 
         '''
@@ -386,8 +402,9 @@ class App(Frame):
         self.necrons_threat_combo = Combobox(self.win, values=type_threat)
         self.necrons_threat_combo.current(0)
         self.necrons_threat_combo.bind('<<ComboboxSelected>>',
-                                       lambda event: add_button_result_to_dict(event, 'угроза некронов',
-                                                                               'necrons_threat_result'))
+                                       lambda event: add_button_result_to_dict(event,
+                                                                               'угроза некронов',
+                                                                               'necrons_threat_combo'))
         self.necrons_threat_combo.place(relwidth=0.1, relheight=0.1, relx=0.24, rely=0.38)
 
         '''
@@ -398,8 +415,9 @@ class App(Frame):
         self.mutants_threat_combo = Combobox(self.win, values=type_threat)
         self.mutants_threat_combo.current(0)
         self.mutants_threat_combo.bind('<<ComboboxSelected>>',
-                                       lambda event: add_button_result_to_dict(event, 'угроза мутантов',
-                                                                               'mutants_threat_result'))
+                                       lambda event: add_button_result_to_dict(event,
+                                                                               'угроза мутантов',
+                                                                               'mutants_threat_combo'))
         self.mutants_threat_combo.place(relwidth=0.1, relheight=0.1, relx=0.345, rely=0.38)
 
         '''
@@ -410,8 +428,9 @@ class App(Frame):
         self.small_races_threat_combo = Combobox(self.win, values=type_threat)
         self.small_races_threat_combo.current(0)
         self.small_races_threat_combo.bind('<<ComboboxSelected>>',
-                                           lambda event: add_button_result_to_dict(event, 'угроза малых рас',
-                                                                                   'small_races_threat_result'))
+                                           lambda event: add_button_result_to_dict(event,
+                                                                                   'угроза малых рас',
+                                                                                   'small_races_threat_combo'))
         self.small_races_threat_combo.place(relwidth=0.1, relheight=0.1, relx=0.45, rely=0.38)
 
         '''
@@ -422,8 +441,9 @@ class App(Frame):
         self.wild_threat_combo = Combobox(self.win, values=type_threat)
         self.wild_threat_combo.current(0)
         self.wild_threat_combo.bind('<<ComboboxSelected>>',
-                                    lambda event: add_button_result_to_dict(event, 'угроза дикой природы',
-                                                                            'wild_threat_result'))
+                                    lambda event: add_button_result_to_dict(event,
+                                                                            'угроза дикой природы',
+                                                                            'wild_threat_combo'))
         self.wild_threat_combo.place(relwidth=0.1, relheight=0.1, relx=0.555, rely=0.38)
 
         '''
@@ -434,8 +454,9 @@ class App(Frame):
         self.disaster_threat_combo = Combobox(self.win, values=type_threat)
         self.disaster_threat_combo.current(0)
         self.disaster_threat_combo.bind('<<ComboboxSelected>>',
-                                        lambda event: add_button_result_to_dict(event, 'угроза стихийных бедствий',
-                                                                                'disaster_threat_result'))
+                                        lambda event: add_button_result_to_dict(event,
+                                                                                'угроза стихийных бедствий',
+                                                                                'disaster_threat_combo'))
         self.disaster_threat_combo.place(relwidth=0.1, relheight=0.1, relx=0.66, rely=0.38)
 
         '''
@@ -446,8 +467,9 @@ class App(Frame):
         self.bandits_threat_combo = Combobox(self.win, values=type_threat)
         self.bandits_threat_combo.current(0)
         self.bandits_threat_combo.bind('<<ComboboxSelected>>',
-                                       lambda event: add_button_result_to_dict(event, 'угроза бандитов',
-                                                                               'bandits_threat_result'))
+                                       lambda event: add_button_result_to_dict(event,
+                                                                               'угроза бандитов',
+                                                                               'bandits_threat_combo'))
         self.bandits_threat_combo.place(relwidth=0.1, relheight=0.1, relx=0.765, rely=0.38)
 
         '''
@@ -458,8 +480,9 @@ class App(Frame):
         self.rebels_threat_combo = Combobox(self.win, values=type_threat)
         self.rebels_threat_combo.current(0)
         self.rebels_threat_combo.bind('<<ComboboxSelected>>',
-                                      lambda event: add_button_result_to_dict(event, 'угроза мятежников',
-                                                                              'rebels_threat_result'))
+                                      lambda event: add_button_result_to_dict(event,
+                                                                              'угроза мятежников',
+                                                                              'rebels_threat_combo'))
         self.rebels_threat_combo.place(relwidth=0.1, relheight=0.1, relx=0.605, rely=0.56)
 
         '''
@@ -470,8 +493,9 @@ class App(Frame):
         self.demons_threat_combo = Combobox(self.win, values=type_threat)
         self.demons_threat_combo.current(0)
         self.demons_threat_combo.bind('<<ComboboxSelected>>',
-                                      lambda event: add_button_result_to_dict(event, 'угроза демонов',
-                                                                              'demons_threat_result'))
+                                      lambda event: add_button_result_to_dict(event,
+                                                                              'угроза демонов',
+                                                                              'demons_threat_combo'))
         self.demons_threat_combo.place(relwidth=0.1, relheight=0.1, relx=0.295, rely=0.56)
 
         """
@@ -522,59 +546,7 @@ class App(Frame):
         self.buff2 = Checkbutton(self.win, text='Щедрая награда', variable=self.buff2_status)
         self.buff2.place(relx=0.75, rely=0.9)
 
-    """
-    Методы, отвечающие за получение результата кнопок интерфейса/////////сделай DRY когда нибудь
-    """
-
-    def terrain_result(self):
-        return self.terrain_combo.get()
-
-    def danger_result(self):
-        return self.danger_combo.get()
-
-    def type_result(self):
-        return self.type_combo.get()
-
-    def orcs_threat_result(self):
-        return self.orcs_threat_combo.get()
-
-    def chaos_threat_result(self):
-        return self.chaos_threat_combo.get()
-
-    def t_elves_threat_result(self):
-        return self.t_elves_threat_combo.get()
-
-    def tyranids_threat_result(self):
-        return self.tyranids_threat_combo.get()
-
-    def tau_threat_result(self):
-        return self.tau_threat_combo.get()
-
-    def necrons_threat_result(self):
-        return self.necrons_threat_combo.get()
-
-    def mutants_threat_result(self):
-        return self.mutants_threat_combo.get()
-
-    def small_races_threat_result(self):
-        return self.small_races_threat_combo.get()
-
-    def wild_threat_result(self):
-        return self.wild_threat_combo.get()
-
-    def disaster_threat_result(self):
-        return self.disaster_threat_combo.get()
-
-    def bandits_threat_result(self):
-        return self.bandits_threat_combo.get()
-
-    def rebels_threat_result(self):
-        return self.rebels_threat_combo.get()
-
-    def demons_threat_result(self):
-        return self.demons_threat_combo.get()
-
-    def quit(self):
+    def quit(self) -> None:
         """Метод уничтожающий экзепляр интерфейса после нажатия кнопки START"""
         self.win.destroy()
 
