@@ -320,7 +320,7 @@ class App(Frame):
         self.type_combo.bind('<<ComboboxSelected>>',
                              lambda event: add_button_result_to_dict(event,
                                                                      'тип события',
-                                                                     'type_combo '))
+                                                                     'type_combo'))
         self.type_combo.place(relwidth=0.2, relheight=0.1, relx=0.799, rely=0.7)
 
         '''
