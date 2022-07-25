@@ -224,7 +224,7 @@ def add_button_result_to_dict(event, button: str, combobox_name: str) -> None:
     global tkinter_result
 
     # Вызываю метод необходимого аттрибута, который возвращает мне нужное значение
-    dict_res = universal_get(combobox_name)
+    dict_res = table_obj.universal_get(combobox_name)
 
     # Добавляю или изменяю в глобальном словаре tkinter_result вложенные словари в котором ключ это переданный аргумент
     # button, а значение это результат того, что вернулось из методов result-методов и дефакто является выбранным в
@@ -249,16 +249,6 @@ def check_buttons() -> None:
 
     tkinter_result['дебафф награды'] = table_obj.debuff2_status.get()
     tkinter_result['бафф награды'] = table_obj.buff2_status.get()
-
-
-def universal_get(get_name: str):
-    """
-    Функция вызывает метод get для комбобоксов, чтобы получить результаты их выборов
-    :param get_name: строковое название конкретного комбобокса, которому будет вызываться метод
-    :return: вызов функции get для получения итогового результата выбора combobox
-    """
-    combo_name = table_obj.__getattribute__(get_name)
-    return combo_name.get()
 
 
 class App(Frame):
@@ -460,7 +450,7 @@ class App(Frame):
         self.disaster_threat_combo.place(relwidth=0.1, relheight=0.1, relx=0.66, rely=0.38)
 
         '''
-        Кнопка определяющая степень угрозы стихийных бедствий на местности
+        Кнопка определяющая степень угрозы бандитов на местности
         '''
         self.bandits_threat_name = Label(self.win, text='Бандиты')
         self.bandits_threat_name.place(relx=0.76, rely=0.3)
@@ -473,7 +463,7 @@ class App(Frame):
         self.bandits_threat_combo.place(relwidth=0.1, relheight=0.1, relx=0.765, rely=0.38)
 
         '''
-        Кнопка определяющая степень угрозы стихийных бедствий на местности
+        Кнопка определяющая степень угрозы мятежников на местности
         '''
         self.rebels_threat_name = Label(self.win, text='Мятежники')
         self.rebels_threat_name.place(relx=0.6, rely=0.48)
@@ -486,7 +476,7 @@ class App(Frame):
         self.rebels_threat_combo.place(relwidth=0.1, relheight=0.1, relx=0.605, rely=0.56)
 
         '''
-        Кнопка определяющая степень угрозы стихийных бедствий на местности
+        Кнопка определяющая степень угрозы демонов на местности
         '''
         self.demons_threat_name = Label(self.win, text='Демоны')
         self.demons_threat_name.place(relx=0.295, rely=0.48)
@@ -549,6 +539,16 @@ class App(Frame):
     def quit(self) -> None:
         """Метод уничтожающий экзепляр интерфейса после нажатия кнопки START"""
         self.win.destroy()
+
+    @staticmethod
+    def universal_get(get_name: str):
+        """
+        Функция вызывает метод get для комбобоксов, чтобы получить результаты их выборов
+        :param get_name: строковое название конкретного комбобокса, которому будет вызываться метод
+        :return: вызов функции get для получения итогового результата выбора combobox
+        """
+        combo_name = table_obj.__getattribute__(get_name)
+        return combo_name.get()
 
 
 if __name__ == "__main__":
